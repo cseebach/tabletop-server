@@ -28,7 +28,7 @@ class DatabaseGame(object):
         return True
 
     def add_actions(self, actions):
-        last_id = self.db.redis.incrby("actions:"+game_id, len(actions))
+        last_id = self.db.redis.incrby("actions:"+self.id, len(actions))
         ids = range(last_id - len(actions) + 1, last_id + 1)
 
         for action, action_id in zip(actions, ids):
@@ -53,11 +53,6 @@ class Database(object):
 
         self.mongo = self._mongo_client.tabletop
         self.redis = redis.StrictRedis(host='localhost', port=6379, db=0)
-
-    #may not need to make public
-    # def getNewActionNumbers(game_id, size=1):
-    #     result = self.redis.incrby("actions:"+game_id, size)
-    #     return list(range(result - size + 1, result + 1))
 
     def new_game(self, name):
         return DatabaseGame.new(self, name)
