@@ -30,7 +30,7 @@ class Game(object):
             action = {"action":"addToDeck", "card":card_id, "template":template, "faction":faction}
             new_actions.append(action)
 
-        self.add_actions(new_actions)
+        self.db_game.add_actions(new_actions)
 
     @staticmethod
     def create(db, name, faction, **kwargs):
