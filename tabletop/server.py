@@ -17,7 +17,7 @@ class Game(object):
 
     def create_deck(self):
         templates = []
-        for template, quantity in deck:
+        for template, quantity in decks.decks[self.faction]:
             for i in range(quantity):
                 templates.append(template)
 
@@ -85,15 +85,12 @@ class GameHandler(socketserver.StreamRequestHandler):
             self.write({"action":"joinError", "error":error})
 
     def create(self, name, faction, **kwargs):
-        game = self.db.get_game(name)
-        if not game:
-            self.game = self.db.new_game(name)
-            self.game.join(faction)
+        game, error = Game.create(self.db, name, faction)
+        if game:
             self.write({"action":"created"})
-            print("game created")
+            self.game = game
         else:
-            self.writeJSON({"action":"createError", "error":"game already exists"})
-            print("error in game creation")
+            self.write({"action":"createError", "error":error})
 
     def joinOrCreate(self):
         while not self.connected:
