@@ -16,18 +16,6 @@ class DatabaseGame(object):
         game_id = str(db.mongo.games.insert({"name":name}))
         return DatabaseGame(db, game_id)
 
-    def join(self, faction):
-        key = "players:"+self.id
-        already_there = self.db.redis.sismember(key, faction)
-        if already_there:
-            return False
-
-        added = self.db.redis.sadd(key, faction)
-        if not added:
-            return False
-
-        return True
-
     def add_actions(self, actions):
         last_id = self.db.redis.incrby("actions:"+self.id, len(actions))
         ids = range(last_id - len(actions) + 1, last_id + 1)
@@ -58,6 +46,9 @@ class Database(object):
 
         self.mongo = self._mongo_client.tabletop
         self.redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+    def new_client(self):
+        return str(self.mongo.clients.insert({}))
 
     def new_game(self, name):
         return DatabaseGame.new(self, name)

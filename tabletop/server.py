@@ -32,8 +32,8 @@ class GameHandler(socketserver.StreamRequestHandler):
             else:
                 self.game.add_action(action)
 
-    def join(self, name, faction, **kwargs):
-        game, error = Game.join(self.db, name, faction)
+    def join(self, name, **kwargs):
+        game, error = Game.join(self.db, name)
         if game:
             self.write({"action":"joined"})
             self.game = game
@@ -41,8 +41,8 @@ class GameHandler(socketserver.StreamRequestHandler):
         else:
             self.write({"action":"joinError", "error":error})
 
-    def create(self, name, faction, **kwargs):
-        game, error = Game.create(self.db, name, faction)
+    def create(self, name, **kwargs):
+        game, error = Game.create(self.db, name)
         if game:
             self.write({"action":"created"})
             self.game = game
