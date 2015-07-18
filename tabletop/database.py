@@ -3,14 +3,6 @@ from collections import namedtuple
 import redis
 import pymongo
 
-class DatabaseGameActions(object):
-
-    def add(actions):
-        pass
-
-    def retrieve_new():
-        pass
-
 
 class DatabaseGame(object):
 
@@ -33,8 +25,26 @@ class DatabaseGame(object):
         if not added:
             return False
 
-        self.faction = faction
         return True
+
+    def add_actions(self, actions):
+        last_id = self.db.redis.incrby("actions:"+game_id, len(actions))
+        ids = range(last_id - len(actions) + 1, last_id + 1)
+
+        for action, action_id in zip(actions, ids):
+            action["action_id"] = action_id
+            action["game_id"] = self.id
+
+        self.db.mongo.actions.insert(actions)
+
+    def add_action(self, action):
+        self.add_actions([action])
+
+    def get_actions(self, after=0, limit=1000):
+        query = {"action_id":{"$gt":after}}
+        fields = {"_id":False}
+        result = self.db.mongo.actions.find(query, fields, limit=limit)
+        return [action for action in query]
 
 class Database(object):
 
