@@ -67,7 +67,8 @@ class GameHandler(socketserver.StreamRequestHandler):
 
     def read(self):
         data = json.loads(str(self.rfile.readline().strip(), "utf-8"))
-        print("receive: ", data)
+        if data["action"] != "ping":
+            print("receive: ", data)
         return data
 
     def loop(self):
@@ -83,6 +84,7 @@ class GameHandler(socketserver.StreamRequestHandler):
         if game:
             self.write({"action":"joined"})
             self.game = game
+            self.connected = True
         else:
             self.write({"action":"joinError", "error":error})
 
@@ -91,6 +93,7 @@ class GameHandler(socketserver.StreamRequestHandler):
         if game:
             self.write({"action":"created"})
             self.game = game
+            self.connected = True
         else:
             self.write({"action":"createError", "error":error})
 
