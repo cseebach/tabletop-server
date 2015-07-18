@@ -40,7 +40,9 @@ class Game(object):
             game.join(faction)
             game_obj = Game(game, faction)
             game_obj.create_deck()
-            return game_obj
+            return game_obj, None
+        else:
+            return None, "game already exists"
 
     @staticmethod
     def join(db, name, faction, **kwargs):
