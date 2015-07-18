@@ -23,7 +23,7 @@ class DatabaseGame(object):
         game_id = str(db.mongo.games.insert({"name":name}))
         return DatabaseGame(db, game_id)
 
-    def join(faction):
+    def join(self, faction):
         key = "players:"+self.id
         already_there = self.db.redis.sismember(key, faction)
         if already_there:
