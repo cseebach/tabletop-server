@@ -27,7 +27,7 @@ class Game(object):
         counter = 0
         for template in templates:
             card_id = self.faction+":"+str(counter)
-            action = {"action":"addToDeck", "card":card_id, "template":template, "faction":faction}
+            action = {"action":"addToDeck", "card":card_id, "template":template, "faction":self.faction}
             new_actions.append(action)
 
         self.db_game.add_actions(new_actions)
