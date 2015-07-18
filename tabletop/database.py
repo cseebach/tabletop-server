@@ -4,6 +4,7 @@ import redis
 import pymongo
 
 
+
 class DatabaseGame(object):
 
     def __init__(self, db, game_id):
@@ -40,8 +41,8 @@ class DatabaseGame(object):
     def add_action(self, action):
         self.add_actions([action])
 
-    def get_actions(self, after=0, limit=1000):
-        query = {"action_id":{"$gt":after}}
+    def get_actions(self, after, faction, limit=1000):
+        query = {"action_id":{"$gt":after}, "game_id":self.id, "source":{"$ne":faction}}
         fields = {"_id":False}
         result = self.db.mongo.actions.find(query, fields, limit=limit)
         return [action for action in result]
