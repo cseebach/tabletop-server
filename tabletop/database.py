@@ -44,7 +44,7 @@ class DatabaseGame(object):
         query = {"action_id":{"$gt":after}}
         fields = {"_id":False}
         result = self.db.mongo.actions.find(query, fields, limit=limit)
-        return [action for action in query]
+        return [action for action in result]
 
 class Database(object):
 

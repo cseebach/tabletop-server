@@ -10,6 +10,7 @@ class Game(object):
     def __init__(self, db_game, faction):
         self.db_game = db_game
         self.faction = faction
+        self.last_action_retrieved = 0
 
     def add_action(self, action):
         action["faction"] = self.faction
@@ -31,6 +32,11 @@ class Game(object):
             new_actions.append(action)
 
         self.db_game.add_actions(new_actions)
+
+    def get_new_actions(self):
+        new_actions = self.db_game.get_actions(self.last_action_retrieved)
+        self.last_action_retrieved += len(new_actions)
+        return new_actions
 
     @staticmethod
     def create(db, name, faction, **kwargs):
@@ -71,11 +77,15 @@ class GameHandler(socketserver.StreamRequestHandler):
             print("receive: ", data)
         return data
 
+    def respond_to_ping(self):
+        new_actions = self.game.get_new_actions()
+        self.write({"action":"newActions", "updates":new_actions})
+
     def loop(self):
         while True:
             action = self.read()
             if action["action"] == "ping":
-                self.respondToPing()
+                self.respond_to_ping()
             else:
                 self.game.add_action(action)
 
