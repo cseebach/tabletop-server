@@ -1,2 +1,3 @@
 venv/
 tabletop/__pycache__/
+app.log.txt

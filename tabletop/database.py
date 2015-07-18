@@ -41,11 +41,15 @@ class DatabaseGame(object):
     def add_action(self, action):
         self.add_actions([action])
 
-    def get_actions(self, after, faction, limit=1000):
-        query = {"action_id":{"$gt":after}, "game_id":self.id, "source":{"$ne":faction}}
+    def get_actions(self, after, limit=1000, exclude_source=None):
+        query = {"action_id":{"$gt":after}, "game_id":self.id}
         fields = {"_id":False}
-        result = self.db.mongo.actions.find(query, fields, limit=limit)
-        return [action for action in result]
+        results = self.db.mongo.actions.find(query, fields, limit=limit)
+        results = [action for action in results]
+        total_size = len(results)
+        if exclude_source:
+            results = [action for action in results if action["source"] != exclude_source]
+        return results, total_size
 
 class Database(object):
 

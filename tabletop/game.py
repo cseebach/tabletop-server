@@ -9,13 +9,19 @@ class Game(object):
         self.faction = faction
         self.last_action_retrieved = 0
 
-    def add_action(self, action):
+    def add_action(self, action, source=None):
         action["faction"] = self.faction
+        if not source:
+            action["source"] = self.faction
         self.db_game.add_action(action)
 
-    def create_deck(self):
+    def create_decks(self):
+        for faction in ["dryad", "gearpunk", "ice", "minotaur"]:
+            self.create_deck(faction)
+
+    def create_deck(self, faction):
         templates = []
-        for template, quantity in decks[self.faction]:
+        for template, quantity in decks[faction]:
             for i in range(quantity):
                 templates.append(template)
 
@@ -25,14 +31,15 @@ class Game(object):
         counter = 0
         for template in templates:
             card_id = self.faction+":"+str(counter)
-            action = {"action":"addToDeck", "card":card_id, "template":template, "faction":self.faction, "source":"server"}
+            action = {"action":"addToDeck", "card":card_id, "template":template, "faction":faction, "source":"server"}
             new_actions.append(action)
 
         self.db_game.add_actions(new_actions)
 
     def get_new_actions(self):
-        new_actions = self.db_game.get_actions(self.last_action_retrieved, self.faction)
-        self.last_action_retrieved += len(new_actions)
+        new_actions, total_size = self.db_game.get_actions(
+            self.last_action_retrieved, exclude_source=self.faction)
+        self.last_action_retrieved += total_size
         return new_actions
 
     @staticmethod
@@ -42,7 +49,7 @@ class Game(object):
             game = db.new_game(name)
             game.join(faction)
             game_obj = Game(game, faction)
-            game_obj.create_deck()
+            game_obj.create_decks()
             return game_obj, None
         else:
             return None, "game already exists"
@@ -53,7 +60,6 @@ class Game(object):
         if db_game:
             if db_game.join(faction):
                 game = Game(db_game, faction)
-                game.create_deck()
                 return game, None
             else:
                 return None, "game exists but slot is filled"
