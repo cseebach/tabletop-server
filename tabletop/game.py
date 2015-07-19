@@ -29,6 +29,7 @@ class Game(object):
         new_actions = []
         counter = 0
         for template in templates:
+            counter += 1
             card_id = faction+":"+str(counter)
             action = {"action":"addToDeck", "card":card_id, "template":template, "faction":faction, "source":"server"}
             new_actions.append(action)

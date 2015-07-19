@@ -1,6 +1,6 @@
 import socketserver
-import json
 
+import msgpack
 
 from tabletop.database import Database
 from tabletop.game import Game
@@ -9,15 +9,17 @@ from tabletop.game import Game
 class GameHandler(socketserver.StreamRequestHandler):
 
     def write(self, data):
-        as_bytes = (json.dumps(data)+"\n").encode("utf-8")
+        as_bytes = msgpack.packb(data)
+        length = (str(len(as_bytes))+"\n").encode("utf-8")
+        self.wfile.write(length)
         self.wfile.write(as_bytes)
         self.wfile.flush()
         print("written: ", data)
 
     def read(self):
-        data = json.loads(str(self.rfile.readline().strip(), "utf-8"))
-        if data["action"] != "ping":
-            print("receive: ", data)
+        length = int(self.rfile.readline().strip())
+        data = msgpack.unpackb(self.rfile.read(length), encoding='utf-8')
+        print("receive: ", data)
         return data
 
     def respond_to_ping(self):
@@ -69,7 +71,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 56789
+    HOST, PORT = "0.0.0.0", 56789
 
 
 
