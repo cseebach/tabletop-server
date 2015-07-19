@@ -40,7 +40,7 @@ decks = {
         ["treasure_hoard", 4],
         ["unwinged", 4],
         ["dead_of_winter", 3],
-        ["gjolnir", 1],
+        ["fjolnir", 1],
     ],
     "minotaur": [
         ["mine", 20],

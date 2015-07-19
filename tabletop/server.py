@@ -1,27 +1,27 @@
 import socketserver
-
-import msgpack
+import logging
+import datetime
+import json
 
 from tabletop.database import Database
 from tabletop.game import Game
 
+timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')
+logging.basicConfig(filename=timestamp+".log", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class GameHandler(socketserver.StreamRequestHandler):
 
     def write(self, data):
-        as_bytes = msgpack.packb(data)
-        length = (str(len(as_bytes))+"\n").encode("utf-8")
-        self.wfile.write(length)
-        self.wfile.write(as_bytes)
+        self.wfile.write((json.dumps(data)+"\n").encode("utf-8"))
         self.wfile.flush()
-        if "updates" in data and data["updates"]:
-            print("written: ", data)
+        if data["action"] != "newActions" or data["updates"]:
+            logger.debug("written: "+repr(data))
 
     def read(self):
-        length = int(self.rfile.readline().strip())
-        data = msgpack.unpackb(self.rfile.read(length), encoding='utf-8')
+        data = json.loads(self.rfile.readline().decode("utf-8"))
         if data["action"] != "ping":    
-            print("receive: ", data)
+            logger.debug("received: "+repr(data))
         return data
 
     def respond_to_ping(self):
