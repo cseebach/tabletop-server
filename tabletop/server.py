@@ -14,12 +14,14 @@ class GameHandler(socketserver.StreamRequestHandler):
         self.wfile.write(length)
         self.wfile.write(as_bytes)
         self.wfile.flush()
-        print("written: ", data)
+        if "updates" in data and data["updates"]:
+            print("written: ", data)
 
     def read(self):
         length = int(self.rfile.readline().strip())
         data = msgpack.unpackb(self.rfile.read(length), encoding='utf-8')
-        print("receive: ", data)
+        if data["action"] != "ping":    
+            print("receive: ", data)
         return data
 
     def respond_to_ping(self):
